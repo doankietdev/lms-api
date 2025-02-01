@@ -1,0 +1,1 @@
+export const LectureNotFoundError = new Error('Lecture not found')
