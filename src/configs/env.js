@@ -2,6 +2,7 @@ import { config } from 'dotenv'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { ENV_NAMES } from '~/utils/constants'
+import { logger } from '~/utils/logger'
 
 // Validate the environment name
 const isValidEnvName = Object.values(ENV_NAMES).includes(process.env.NODE_ENV)
@@ -34,7 +35,7 @@ const requiredEnvVars = [
 ]
 requiredEnvVars.forEach((key) => {
   if (!process.env[key]) {
-    throw new Error(`Missing required environment variable: ${key}`)
+    logger.warning(`Missing required environment variable: ${key}`)
   }
 })
 
