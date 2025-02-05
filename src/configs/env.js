@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { existsSync } from 'fs'
+import ms from 'ms'
 import { join } from 'path'
 import { ENV_NAMES } from '~/utils/constants'
 import { logger } from '~/utils/logger'
@@ -55,3 +56,5 @@ export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET
 export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME
 
 export const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000'
+
+export const FILE_UPLOADING_MAX_AGE = ms(process.env.FILE_UPLOADING_MAX_AGE || '5m')
