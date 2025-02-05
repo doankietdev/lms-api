@@ -16,10 +16,17 @@ const updateLectureProgress = asyncHandler(async (req, res) => {
   const { courseId, lectureId } = req.params
   const userId = req.id
 
-  await courseProgressService.updateLectureProgress({ userId, courseId, lectureId })
+  const { isCourseCompleted } = await courseProgressService.updateLectureProgress({
+    userId,
+    courseId,
+    lectureId
+  })
 
   return res.status(200).json({
-    message: 'Lecture progress updated successfully.'
+    message: 'Lecture progress updated successfully.',
+    data: {
+      isCourseCompleted
+    }
   })
 })
 

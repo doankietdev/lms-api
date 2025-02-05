@@ -1,12 +1,13 @@
 import { StatusCodes } from 'http-status-codes'
+import path from 'path'
 import { AppError } from '~/errors/app.error'
 import { CourseNotFoundError } from '~/errors/course.error'
 import { LectureNotFoundError } from '~/errors/lecture.error'
 import { Course } from '~/models/course.model'
 import { Lecture } from '~/models/lecture.model'
-import {
-  cloudinaryProvider
-} from '~/providers/cloudinary.provider'
+import { cloudinaryProvider } from '~/providers/cloudinary.provider'
+import { convertFileAppUrlToLocalPath } from '~/utils/formatter'
+import { logger } from '~/utils/logger'
 
 const createCourse = async ({ courseTitle, category, creator }) => {
   return await Course.create({
@@ -87,7 +88,7 @@ const editCourse = async (
 }
 
 const getCourseById = async (courseId) => {
-  const course = await Course.findById(courseId)
+  const course = await Course.findById(courseId).populate('category')
   if (!course) throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
   return course
 }
@@ -111,15 +112,32 @@ const getCourseLecture = async (courseId) => {
   return course
 }
 
-const editLecture = async ({ courseId, lectureId }, { lectureTitle, videoInfo, isPreviewFree }) => {
+const uploadLectureVideoToCloudinary = async (videoUrl, lectureId) => {
+  try {
+    const { secure_url, public_id } = await cloudinaryProvider.uploadMedia(
+      path.join(process.cwd(), 'uploads', convertFileAppUrlToLocalPath(videoUrl))
+    )
+    await Lecture.updateOne({ _id: lectureId }, { videoUrl: secure_url, publicId: public_id })
+  } catch (error) {
+    logger.error(`Upload lecture video to cloudinary failed:: ${error.message}`)
+  }
+}
+
+const editLecture = async (
+  { courseId, lectureId },
+  { lectureTitle, description, videoUrl, isPreviewFree }
+) => {
   const lecture = await Lecture.findById(lectureId)
   if (!lecture) throw AppError.from(LectureNotFoundError, StatusCodes.NOT_FOUND)
 
   // update lecture
   if (lectureTitle) lecture.lectureTitle = lectureTitle
-  if (videoInfo?.videoUrl) lecture.videoUrl = videoInfo.videoUrl
-  if (videoInfo?.publicId) lecture.publicId = videoInfo.publicId
-  lecture.isPreviewFree = isPreviewFree
+  if (videoUrl && lecture.videoUrl !== videoUrl) {
+    lecture.videoUrl = videoUrl
+    uploadLectureVideoToCloudinary(videoUrl, lecture._id)
+  }
+  if (description) lecture.description = description
+  if (isPreviewFree) lecture.isPreviewFree = isPreviewFree
 
   await lecture.save()
 
@@ -182,5 +200,6 @@ export const courseService = {
   editLecture,
   removeLecture,
   getLectureById,
-  togglePublishCourse
+  togglePublishCourse,
+  uploadLectureVideoToCloudinary
 }

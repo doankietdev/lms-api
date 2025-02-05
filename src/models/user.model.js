@@ -1,21 +1,24 @@
 import mongoose from 'mongoose'
+import { ROLES } from '~/utils/constants'
 
 const userSchema = new mongoose.Schema({
+  sub: {
+    type: String,
+    required: true,
+    unique: true
+  },
   name:{
     type:String,
     required:true
   },
   email:{
     type:String,
-    required:true
-  },
-  password:{
-    type:String,
-    required:true
+    required:true,
+    unique: true
   },
   role:{
     type:String,
-    enum:['instructor', 'student'],
+    enum: Object.values(ROLES),
     default:'student'
   },
   enrolledCourses:[

@@ -1,16 +1,18 @@
 import express from 'express'
 import { courseProgressController } from '~/controllers/course-progress.controller'
-import isAuthenticated from '~/middlewares/isAuthenticated'
+import { authMiddleware } from '~/middlewares/auth.middleware'
 
 const router = express.Router()
 
-router.route('/:courseId').get(isAuthenticated, courseProgressController.getCourseProgress)
+router.use(authMiddleware)
+
+router.route('/:courseId').get(courseProgressController.getCourseProgress)
 router
   .route('/:courseId/lecture/:lectureId/view')
-  .post(isAuthenticated, courseProgressController.updateLectureProgress)
-router.route('/:courseId/complete').post(isAuthenticated, courseProgressController.markAsCompleted)
+  .post(courseProgressController.updateLectureProgress)
+router.route('/:courseId/complete').post(courseProgressController.markAsCompleted)
 router
   .route('/:courseId/incomplete')
-  .post(isAuthenticated, courseProgressController.markAsInCompleted)
+  .post(courseProgressController.markAsInCompleted)
 
 export const courseProgressRoute = router

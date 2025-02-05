@@ -1,10 +1,9 @@
 import express from 'express'
 import { authController } from '~/controllers/auth.controller'
+import { authMiddleware } from '~/middlewares/auth.middleware'
 
 const router = express.Router()
 
-router.route('/register').post(authController.register)
-router.route('/login').post(authController.login)
-router.route('/logout').get(authController.logout)
+router.route('/callback').post(authMiddleware, authController.callback)
 
 export const authRoute = router

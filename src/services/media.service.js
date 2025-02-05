@@ -1,7 +1,9 @@
-import { cloudinaryProvider } from '~/providers/cloudinary.provider'
 
-const uploadVideo = async (filePath) => {
-  return await cloudinaryProvider.uploadMedia(filePath)
+const uploadVideo = (appHost, filePath) => {
+  const url = `${appHost}/uploads/${
+    filePath.split('uploads/')[1]
+  }`
+  return { url }
 }
 
 export const mediaService = {

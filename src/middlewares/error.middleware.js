@@ -6,6 +6,7 @@ import { ENV_NAMES } from '~/utils/constants'
 import { InternalServerError, InvalidInputError } from '~/errors/common.error'
 
 export const errorMiddleware = (error, req, res, next) => {
+  console.log(error)
   const isProduction = CURRENT_ENV_NAME === ENV_NAMES.PRODUCTION
   // eslint-disable-next-line no-console
   !isProduction && console.error(error.stack)

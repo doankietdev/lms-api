@@ -8,6 +8,7 @@ import { CLIENT_URL } from './configs/env.js'
 import { errorMiddleware } from './middlewares/error.middleware.js'
 import { route } from './routes/index.js'
 import { apiNotFoundMiddleware } from './middlewares/api-not-found.middleware.js'
+import { hostMiddleware } from './middlewares/host.middleware.js'
 
 const app = express()
 
@@ -22,6 +23,7 @@ app.use(cors({
   credentials:true
 }))
 app.set('trust proxy', 1)
+app.use(hostMiddleware)
 
 route(app)
 

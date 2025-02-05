@@ -1,13 +1,15 @@
 import express from 'express'
 import { userController } from '~/controllers/user.controller'
-import isAuthenticated from '~/middlewares/isAuthenticated'
+import { authMiddleware } from '~/middlewares/auth.middleware'
 import upload from '~/utils/multer'
 
 const router = express.Router()
 
-router.route('/profile').get(isAuthenticated, userController.getUserProfile)
+router.use(authMiddleware)
+
+router.route('/profile').get(userController.getUserProfile)
 router
   .route('/profile/update')
-  .put(isAuthenticated, upload.single('profilePhoto'), userController.updateProfile)
+  .put(upload.single('profilePhoto'), userController.updateProfile)
 
 export const userRoute = router
