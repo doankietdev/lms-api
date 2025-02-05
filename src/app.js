@@ -5,10 +5,11 @@ import express, { json, urlencoded } from 'express'
 import helmet from 'helmet'
 import hpp from 'hpp'
 import { CLIENT_URL } from './configs/env.js'
-import { errorMiddleware } from './middlewares/error.middleware.js'
-import { route } from './routes/index.js'
 import { apiNotFoundMiddleware } from './middlewares/api-not-found.middleware.js'
+import { errorMiddleware } from './middlewares/error.middleware.js'
 import { hostMiddleware } from './middlewares/host.middleware.js'
+import { route } from './routes/index.js'
+import { initCrons } from './crons'
 
 const app = express()
 
@@ -24,6 +25,8 @@ app.use(cors({
 }))
 app.set('trust proxy', 1)
 app.use(hostMiddleware)
+
+initCrons()
 
 route(app)
 
