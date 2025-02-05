@@ -17,7 +17,7 @@ const createCheckoutSession = asyncHandler(async (req, res) => {
 })
 
 const stripeWebhook = asyncHandler(async (req, res) => {
-  await stripeWebhook(req.body)
+  await coursePurchaseService.stripeWebhook(req.body)
   res.status(200).send()
 })
 

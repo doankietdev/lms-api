@@ -8,6 +8,7 @@ import { Course } from '~/models/course.model'
 import { CoursePurchase } from '~/models/course-purchase.model'
 import { Lecture } from '~/models/lecture.model'
 import { User } from '~/models/user.model'
+import { OWNER_CANNOT_PURCHASE } from '~/errors/checkout.error'
 
 const stripe = new Stripe(STRIPE_SECRET_KEY)
 
@@ -15,6 +16,10 @@ const createCheckoutSession = async ({ userId, courseId }) => {
   const course = await Course.findById(courseId)
   if (!course) {
     throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
+  }
+
+  if (course.creator.equals(userId)) {
+    throw AppError.from(OWNER_CANNOT_PURCHASE, StatusCodes.BAD_REQUEST)
   }
 
   // Create a new course purchase record
@@ -27,16 +32,15 @@ const createCheckoutSession = async ({ userId, courseId }) => {
 
   // Create a Stripe checkout session
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
     line_items: [
       {
         price_data: {
-          currency: 'inr',
+          currency: 'USD',
           product_data: {
             name: course.courseTitle,
             images: [course.courseThumbnail]
           },
-          unit_amount: course.coursePrice * 100 // Amount in paise (lowest denomination)
+          unit_amount: Math.round(course.coursePrice * 100) // Amount in paise (lowest denomination)
         },
         quantity: 1
       }
@@ -47,9 +51,6 @@ const createCheckoutSession = async ({ userId, courseId }) => {
     metadata: {
       courseId: courseId,
       userId: userId
-    },
-    shipping_address_collection: {
-      allowed_countries: ['IN']
     }
   })
 
@@ -71,7 +72,7 @@ const stripeWebhook = async (payload) => {
 
   const header = stripe.webhooks.generateTestHeaderString({
     payload: payloadString,
-    STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
   })
 
   const event = stripe.webhooks.constructEvent(payloadString, header, STRIPE_WEBHOOK_SECRET)
@@ -120,16 +121,24 @@ const stripeWebhook = async (payload) => {
 
 const getCourseDetailWithPurchaseStatus = async ({ userId, courseId }) => {
   const course = await Course.findById(courseId)
-    .populate({ path: 'creator' })
+    .populate({ path: 'creator', select: '-sub -role -enrolledCourses -createdAt -updatedAt' })
     .populate({ path: 'lectures' })
   if (!course) {
     throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
   }
 
-  const purchased = await CoursePurchase.findOne({ userId, courseId })
+  const isOwner = course.creator?._id.equals(userId)
+  if (!isOwner) {
+    const coursePurchase = await CoursePurchase.findOne({ userId, courseId, status: 'completed' })
+    return {
+      course,
+      purchased: !!coursePurchase
+    }
+  }
+
   return {
     course,
-    purchased: !!purchased
+    isOwner: true
   }
 }
 

@@ -1,0 +1,1 @@
+export const OWNER_CANNOT_PURCHASE = new Error('Course owner cannot purchase')

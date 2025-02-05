@@ -68,9 +68,17 @@ const updateLectureProgress = async ({ userId, courseId, lectureId }) => {
 
   const course = await Course.findById(courseId)
 
-  if (course.lectures.length === lectureProgressLength) courseProgress.completed = true
+  let isCourseCompleted = false
+  if (course.lectures.length === lectureProgressLength) {
+    courseProgress.completed = true
+    isCourseCompleted = true
+  }
 
   await courseProgress.save()
+
+  return {
+    isCourseCompleted
+  }
 }
 
 const markAsCompleted = async ({ userId, courseId }) => {

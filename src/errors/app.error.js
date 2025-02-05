@@ -52,13 +52,13 @@ export class AppError extends Error {
       ? {
           status: this._status,
           code: this._code,
-          message: this._message,
+          message: this.message,
           details: this._details
         }
       : {
           status: this._status,
           code: this._code,
-          message: this._message,
+          message: this.message,
           rootCause: rootCause ? rootCause.message : this.message,
           details: this._details,
           logMessage: this._logMessage

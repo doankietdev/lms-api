@@ -45,6 +45,8 @@ export const PORT = process.env.PORT || 5600
 export const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017'
 export const DATABASE_NAME = process.env.DATABASE_NAME || 'lms'
 
+export const REDIS_URI = process.env.REDIS_URI || 'redis://default:dev@localhost:6379/0'
+
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
 

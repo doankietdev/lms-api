@@ -115,13 +115,13 @@ const getCourseLecture = asyncHandler(async (req, res) => {
 })
 
 const editLecture = asyncHandler(async (req, res) => {
-  const { lectureTitle, videoInfo, isPreviewFree } = req.body
+  const { lectureTitle, description, videoUrl, isPreviewFree } = req.body
 
   const { courseId, lectureId } = req.params
 
   const lecture = await courseService.editLecture(
     { courseId, lectureId },
-    { lectureTitle, videoInfo, isPreviewFree }
+    { lectureTitle, description, videoUrl, isPreviewFree }
   )
 
   return res.status(200).json({

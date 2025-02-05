@@ -5,12 +5,14 @@ import { courseRoute } from './course.route'
 import { mediaRoute } from './media.route'
 import { coursePurchaseRoute } from './course-purchase.route'
 import { userRoute } from './user.route'
+import { categoryRoute } from './category.route'
 
 const router = express.Router()
 
 router.use('/auth', authRoute)
 router.use('/media', mediaRoute)
 router.use('/user', userRoute)
+router.use('/category', categoryRoute)
 router.use('/course', courseRoute)
 router.use('/purchase', coursePurchaseRoute)
 router.use('/progress', courseProgressRoute)

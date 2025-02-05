@@ -5,9 +5,10 @@ const lectureSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  videoUrl: { type: String },
-  publicId: { type: String },
-  isPreviewFree: { type: Boolean }
+  description: { type: String, default: '' },
+  videoUrl: { type: String, default: '' },
+  publicId: { type: String, default: '' },
+  isPreviewFree: { type: Boolean, default: 'false' }
 }, { timestamps:true })
 
 export const Lecture = mongoose.model('Lecture', lectureSchema)
