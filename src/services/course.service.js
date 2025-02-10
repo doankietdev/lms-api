@@ -21,7 +21,7 @@ const searchCourse = async ({ query = '', categories = '', sortByPrice = '' }) =
   const searchCriteria = {
     isPublished: true,
     $or: [
-      { courseTitle: { $regex: query } },
+      { courseTitle: { $regex: query, $options: 'i' } },
       { subTitle: { $regex: query, $options: 'i' } }
     ]
   }
