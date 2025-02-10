@@ -48,6 +48,8 @@ export const DATABASE_NAME = process.env.DATABASE_NAME || 'lms'
 
 export const REDIS_URI = process.env.REDIS_URI || 'redis://default:dev@localhost:6379/0'
 
+export const AUTH0_URL = process.env.AUTH0_URL
+
 export const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY
 export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET
 

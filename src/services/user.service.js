@@ -42,7 +42,7 @@ const updateProfile = async (userId, { name, photoFile }) => {
     throw AppError.from(UserNotFoundError, StatusCodes.NOT_FOUND)
   }
   if (user.photoUrl) {
-    const publicId = user.photoUrl.split('/').pop().split('.')[0] // extract public id
+    const publicId = user.photoUrl.split('/').pop().split('.')[0]
     cloudinaryProvider.deleteMedia(publicId)
   }
 

@@ -15,7 +15,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   const photoFile = req.file
 
   const updatedUser = await userService.updateProfile(userId, { name, photoFile })
-  
+
   return res.status(200).json({
     success: true,
     user: updatedUser,
