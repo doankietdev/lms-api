@@ -17,19 +17,19 @@ const createCourse = async ({ courseTitle, category, creator }) => {
   })
 }
 
-const searchCourse = async ({ query = '', categories = [], sortByPrice = '' }) => {
+const searchCourse = async ({ query = '', categories = '', sortByPrice = '' }) => {
   const searchCriteria = {
     isPublished: true,
     $or: [
-      { courseTitle: { $regex: query, $options: 'i' } },
-      { subTitle: { $regex: query, $options: 'i' } },
-      { category: { $regex: query, $options: 'i' } }
+      { courseTitle: { $regex: query } },
+      { subTitle: { $regex: query, $options: 'i' } }
     ]
   }
 
   // if categories selected
-  if (categories.length > 0) {
-    searchCriteria.category = { $in: categories }
+  const arrayCategories = categories?.split(',')
+  if (arrayCategories.length > 0 && arrayCategories[0] !== '') {
+    searchCriteria.category = { $in: arrayCategories }
   }
 
   // define sorting order

@@ -22,7 +22,7 @@ const createCourse = asyncHandler(async (req, res) => {
 })
 
 const searchCourse = asyncHandler(async (req, res) => {
-  const { query = '', categories = [], sortByPrice = '' } = req.query
+  const { query = '', categories, sortByPrice = '' } = req.query
 
   const courses = await courseService.searchCourse({ query, categories, sortByPrice })
 

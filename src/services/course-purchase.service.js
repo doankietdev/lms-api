@@ -8,7 +8,7 @@ import { Course } from '~/models/course.model'
 import { CoursePurchase } from '~/models/course-purchase.model'
 import { Lecture } from '~/models/lecture.model'
 import { User } from '~/models/user.model'
-import { OWNER_CANNOT_PURCHASE } from '~/errors/checkout.error'
+import { COURSE_FREE_ERROR, OWNER_CANNOT_PURCHASE_ERROR } from '~/errors/checkout.error'
 
 const stripe = new Stripe(STRIPE_SECRET_KEY)
 
@@ -19,7 +19,11 @@ const createCheckoutSession = async ({ userId, courseId }) => {
   }
 
   if (course.creator.equals(userId)) {
-    throw AppError.from(OWNER_CANNOT_PURCHASE, StatusCodes.BAD_REQUEST)
+    throw AppError.from(OWNER_CANNOT_PURCHASE_ERROR, StatusCodes.BAD_REQUEST)
+  }
+
+  if (course.coursePrice === 0) {
+    throw AppError.from(COURSE_FREE_ERROR, StatusCodes.BAD_REQUEST)
   }
 
   // Create a new course purchase record
