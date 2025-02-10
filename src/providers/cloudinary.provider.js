@@ -8,6 +8,10 @@ cloudinary.config({
   cloud_name: CLOUDINARY_CLOUD_NAME
 })
 
+/**
+ *
+ * @returns {Promise<{ secure_url: string, public_id: string }>}
+ */
 export const uploadMedia = async (filePath) => {
   try {
     if (!filePath) {
@@ -17,7 +21,7 @@ export const uploadMedia = async (filePath) => {
     const response = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_large(
         filePath,
-        { resource_type: 'auto' },
+        { resource_type: 'auto', folder: 'lms' },
         function (error, result) {
           if (error) return reject(error)
           resolve(result)

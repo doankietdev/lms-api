@@ -1,0 +1,1 @@
+export const FILE_UPLOAD_ERROR = new Error('Failed to upload file')

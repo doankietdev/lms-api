@@ -1,5 +1,5 @@
 
-const uploadVideo = (appHost, filePath) => {
+const upload = (appHost, filePath) => {
   const url = `${appHost}/uploads/${
     filePath.split('uploads/')[1]
   }`
@@ -7,5 +7,5 @@ const uploadVideo = (appHost, filePath) => {
 }
 
 export const mediaService = {
-  uploadVideo
+  upload
 }

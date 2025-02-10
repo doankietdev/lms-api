@@ -1,6 +1,6 @@
+import fs from 'fs'
 import multer from 'multer'
 import path from 'path'
-import fs from 'fs'
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -29,4 +29,35 @@ const storage = multer.diskStorage({
   }
 })
 
-export default multer({ storage: storage })
+const fileUploadMiddleware = {
+  single(fieldName = '') {
+    return (req, res, next) => {
+      multer({ storage: storage }).single(fieldName)(req, res, (err) => {
+        if (err) next(err)
+
+        if (req.file) {
+          req.fileUrl = `${req.appHost}/uploads/${req.file.path.split('uploads/')[1]}`
+        }
+
+        next()
+      })
+    }
+  },
+  fields(fieldNames = []) {
+    return (req, res, next) => {
+      multer({ storage: storage }).fields(fieldNames)(req, res, (err) => {
+        if (err) next(err)
+
+        if (req.files) {
+          req.fileUrls = req.files.map(
+            (file) => (req.fileUrl = `${req.appHost}/uploads/${file.path.split('uploads/')[1]}`)
+          )
+        }
+
+        next()
+      })
+    }
+  }
+}
+
+export default fileUploadMiddleware

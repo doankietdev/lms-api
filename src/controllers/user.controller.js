@@ -9,12 +9,25 @@ const getUserProfile = asyncHandler(async (req, res) => {
   })
 })
 
+
+const changeAvatar = asyncHandler(async (req, res) => {
+  const userId = req.id
+  const avatarFilePath = req.file.path
+
+  const { avatarUrl } = await userService.changeAvatar(userId, { avatarFilePath })
+
+  return res.status(200).json({
+    success: true,
+    data: { avatarUrl },
+    message: 'Change avatar successfully.'
+  })
+})
+
 const updateProfile = asyncHandler(async (req, res) => {
   const userId = req.id
   const { name } = req.body
-  const photoFile = req.file
 
-  const updatedUser = await userService.updateProfile(userId, { name, photoFile })
+  const updatedUser = await userService.updateProfile(userId, { name })
 
   return res.status(200).json({
     success: true,
@@ -25,5 +38,6 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 export const userController = {
   getUserProfile,
+  changeAvatar,
   updateProfile
 }

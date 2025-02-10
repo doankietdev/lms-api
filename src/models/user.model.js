@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
   photoUrl:{
     type:String,
     default:''
+  },
+  photoPublicId:{
+    type:String,
+    default:''
   }
 }, { timestamps:true })
 

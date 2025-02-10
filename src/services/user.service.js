@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes'
 import { AppError } from '~/errors/app.error'
-import {
-  UserAlreadyExistError,
-  UserNotFoundError
-} from '~/errors/user.error'
+import { UserAlreadyExistError, UserNotFoundError } from '~/errors/user.error'
 import { User } from '~/models/user.model'
 import { cloudinaryProvider } from '~/providers/cloudinary.provider'
+import path from 'path'
+import { convertFileAppUrlToLocalPath } from '~/utils/formatter'
+import { InternalServerError } from '~/errors/common.error'
 
 const createUser = async ({ sub, email, name, photo }) => {
   const user = await User.findOne({ sub })
@@ -36,26 +36,39 @@ const getUserProfileBySub = async (sub) => {
   return user
 }
 
-const updateProfile = async (userId, { name, photoFile }) => {
+const changeAvatar = async (userId, { avatarFilePath }) => {
+  const foundUser = await User.findOne({ _id: userId })
+  if (!foundUser) throw AppError.from(UserNotFoundError, StatusCodes.NOT_FOUND)
+
+  const { secure_url, public_id } = await cloudinaryProvider.uploadMedia(avatarFilePath)
+
+  const { modifiedCount } = await User.updateOne(
+    { _id: userId },
+    { photoUrl: secure_url, photoPublicId: public_id }
+  )
+  if (!modifiedCount) throw AppError.from(InternalServerError, StatusCodes.INTERNAL_SERVER_ERROR)
+
+  if (foundUser.photoPublicId) {
+    await cloudinaryProvider.deleteMedia(foundUser.photoPublicId)
+  }
+
+  return {
+    avatarUrl: secure_url
+  }
+}
+
+const updateProfile = async (userId, { name }) => {
   const user = await User.findById(userId)
   if (!user) {
     throw AppError.from(UserNotFoundError, StatusCodes.NOT_FOUND)
   }
-  if (user.photoUrl) {
-    const publicId = user.photoUrl.split('/').pop().split('.')[0]
-    cloudinaryProvider.deleteMedia(publicId)
-  }
-
-  const cloudResponse = await cloudinaryProvider.uploadMedia(photoFile.path)
-  const photoUrl = cloudResponse.secure_url
-
-  const updatedData = { name, photoUrl }
-  return await User.findByIdAndUpdate(userId, updatedData, { new: true })
+  return await User.findByIdAndUpdate(userId, { name }, { new: true })
 }
 
 export const userService = {
   createUser,
   getUserProfile,
   getUserProfileBySub,
+  changeAvatar,
   updateProfile
 }
