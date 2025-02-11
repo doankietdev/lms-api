@@ -16,13 +16,6 @@ export class AppError extends Error {
     return appError
   }
 
-  getRootCause() {
-    if (this._rootCause) {
-      return this._rootCause instanceof AppError ? this._rootCause.getRootCause() : this._rootCause
-    }
-    return null
-  }
-
   // Wrapper (Design Pattern)
   wrap(rootCause) {
     const appError = AppError.from(this, this._status)
@@ -65,11 +58,22 @@ export class AppError extends Error {
       }
   }
 
+  getRootCause() {
+    if (this._rootCause) {
+      return this._rootCause instanceof AppError ? this._rootCause.getRootCause() : this._rootCause
+    }
+    return null
+  }
+
   getStatus() {
     return this._status
   }
 
   getDetails() {
     return this._details
+  }
+
+  getLogMessage() {
+    return this._logMessage
   }
 }

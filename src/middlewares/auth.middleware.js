@@ -12,20 +12,24 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
     issuerBaseURL: AUTH0_URL,
     tokenSigningAlg: 'RS256'
   })(req, res, async (err) => {
-    if (err) {
-      if (err instanceof InvalidTokenError || err instanceof UnauthorizedError) {
-        next(AppError.from(AuthFailureError, StatusCodes.UNAUTHORIZED))
-      } else {
-        next(err)
+    try {
+      if (err) {
+        if (err instanceof InvalidTokenError || err instanceof UnauthorizedError) {
+          next(AppError.from(AuthFailureError, StatusCodes.UNAUTHORIZED).withLog(err.message))
+        } else {
+          next(err)
+        }
+        return
       }
-      return
-    }
 
-    const user = await User.findOne({ sub: req.auth?.payload?.sub })
-    if (user) {
-      req.id = user._id.toString()
-      req.role = user.role
+      const user = await User.findOne({ sub: req.auth?.payload?.sub })
+      if (user) {
+        req.id = user._id.toString()
+        req.role = user.role
+      }
+      next()
+    } catch (error) {
+      next(error)
     }
-    next()
   })
 })

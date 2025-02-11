@@ -13,12 +13,12 @@ export const errorMiddleware = (error, req, res, next) => {
 
   if (error instanceof AppError) {
     const status = error.getStatus()
-    const rootCause = error.getRootCause()
+    const logMessage = error.getLogMessage()
     res.status(status).json(error.toJSON(isProduction))
     if (status >= 400 && status < 500) {
-      logger.warning(rootCause ? rootCause.message : error.message)
+      logger.warning(logMessage ? logMessage : error.message)
     } else if (status >= 500 && status <= 599) {
-      logger.error(rootCause ? rootCause.message : error.message)
+      logger.error(logMessage ? logMessage : error.message)
     }
   } else if (error instanceof ZodError) {
     const appError = AppError.from(InvalidInputError, StatusCodes.BAD_REQUEST).wrap(error)
@@ -28,7 +28,9 @@ export const errorMiddleware = (error, req, res, next) => {
     })
 
     res.status(appError.getStatus()).json(appError.toJSON(isProduction))
-    logger.warning(`${error.message}-${JSON.stringify(appError.getDetails())}`)
+    logger.warning(
+      `${error.message}-${JSON.stringify(appError.getDetails())}`
+    )
   } else {
     const appError = AppError.from(InternalServerError, StatusCodes.INTERNAL_SERVER_ERROR).wrap(
       error
