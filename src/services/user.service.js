@@ -1,11 +1,9 @@
 import { StatusCodes } from 'http-status-codes'
 import { AppError } from '~/errors/app.error'
+import { InternalServerError } from '~/errors/common.error'
 import { UserAlreadyExistError, UserNotFoundError } from '~/errors/user.error'
 import { User } from '~/models/user.model'
 import { cloudinaryProvider } from '~/providers/cloudinary.provider'
-import path from 'path'
-import { convertFileAppUrlToLocalPath } from '~/utils/formatter'
-import { InternalServerError } from '~/errors/common.error'
 
 const createUser = async ({ sub, email, name, photo }) => {
   const user = await User.findOne({ sub })

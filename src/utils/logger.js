@@ -29,15 +29,15 @@ const coloredOutputFormat = format.printf((log) => {
   let color = infoColor
 
   switch (log.level) {
-    case 'error':
-      color = errorColor
-      break
-    case 'warning':
-      color = warningColor
-      break
-    case 'success':
-      color = successColor
-      break
+  case 'error':
+    color = errorColor
+    break
+  case 'warning':
+    color = warningColor
+    break
+  case 'success':
+    color = successColor
+    break
   }
 
   return `${log['timestamp']}\t${color(log.message)}`

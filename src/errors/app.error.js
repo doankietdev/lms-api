@@ -50,19 +50,19 @@ export class AppError extends Error {
     const rootCause = this.getRootCause()
     return isProduction
       ? {
-          status: this._status,
-          code: this._code,
-          message: this.message,
-          details: this._details
-        }
+        status: this._status,
+        code: this._code,
+        message: this.message,
+        details: this._details
+      }
       : {
-          status: this._status,
-          code: this._code,
-          message: this.message,
-          rootCause: rootCause ? rootCause.message : this.message,
-          details: this._details,
-          logMessage: this._logMessage
-        }
+        status: this._status,
+        code: this._code,
+        message: this.message,
+        rootCause: rootCause ? rootCause.message : this.message,
+        details: this._details,
+        logMessage: this._logMessage
+      }
   }
 
   getStatus() {
