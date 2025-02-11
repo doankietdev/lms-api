@@ -18,7 +18,7 @@ export class AppError extends Error {
 
   getRootCause() {
     if (this._rootCause) {
-      return this._rootCause instanceof AppError ? this.rootCause.getRootCause() : this.rootCause
+      return this._rootCause instanceof AppError ? this._rootCause.getRootCause() : this._rootCause
     }
     return null
   }
@@ -67,5 +67,9 @@ export class AppError extends Error {
 
   getStatus() {
     return this._status
+  }
+
+  getDetails() {
+    return this._details
   }
 }

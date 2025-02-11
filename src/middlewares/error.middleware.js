@@ -4,6 +4,7 @@ import { CURRENT_ENV_NAME } from '~/configs/env'
 import { AppError } from '~/errors/app.error'
 import { ENV_NAMES } from '~/utils/constants'
 import { InternalServerError, InvalidInputError } from '~/errors/common.error'
+import { logger } from '~/utils/logger'
 
 export const errorMiddleware = (error, req, res, next) => {
   const isProduction = CURRENT_ENV_NAME === ENV_NAMES.PRODUCTION
@@ -11,7 +12,14 @@ export const errorMiddleware = (error, req, res, next) => {
   !isProduction && console.error(error.stack)
 
   if (error instanceof AppError) {
-    res.status(error.getStatus()).json(error.toJSON(isProduction))
+    const status = error.getStatus()
+    const rootCause = error.getRootCause()
+    res.status(status).json(error.toJSON(isProduction))
+    if (status >= 400 && status < 500) {
+      logger.warning(rootCause ? rootCause.message : error.message)
+    } else if (status >= 500 && status <= 599) {
+      logger.error(rootCause ? rootCause.message : error.message)
+    }
   } else if (error instanceof ZodError) {
     const appError = AppError.from(InvalidInputError, StatusCodes.BAD_REQUEST).wrap(error)
 
@@ -20,11 +28,13 @@ export const errorMiddleware = (error, req, res, next) => {
     })
 
     res.status(appError.getStatus()).json(appError.toJSON(isProduction))
+    logger.warning(`${error.message}-${JSON.stringify(appError.getDetails())}`)
   } else {
     const appError = AppError.from(InternalServerError, StatusCodes.INTERNAL_SERVER_ERROR).wrap(
       error
     )
     res.status(appError.getStatus()).json(appError.toJSON(isProduction))
+    logger.error(error.message)
   }
 
   return next()
