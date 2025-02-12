@@ -15,7 +15,9 @@ export const authMiddleware = asyncHandler(async (req, res, next) => {
     try {
       if (err) {
         if (err instanceof InvalidTokenError || err instanceof UnauthorizedError) {
-          next(AppError.from(AuthFailureError, StatusCodes.UNAUTHORIZED).withLog(err.message))
+          next(
+            AppError.from(AuthFailureError, StatusCodes.UNAUTHORIZED).wrap(err).withLog(err.message)
+          )
         } else {
           next(err)
         }
