@@ -9,12 +9,14 @@ const router = express.Router()
 
 router.route('/published-courses').get(courseController.getPublishedCourse)
 
+router.route('/search').get(courseController.searchCourse)
+
 router.use(authMiddleware)
 
 router
   .route('/')
   .post(permissionMiddleware(ROLES.ADMIN, ROLES.INSTRUCTOR), courseController.createCourse)
-router.route('/search').get(courseController.searchCourse)
+
 router.route('/').get(courseController.getCreatorCourses)
 router
   .route('/:courseId')

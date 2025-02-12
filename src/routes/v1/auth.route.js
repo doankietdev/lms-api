@@ -4,6 +4,8 @@ import { authMiddleware } from '~/middlewares/auth.middleware'
 
 const router = express.Router()
 
-router.route('/callback').post(authMiddleware, authController.callback)
+router.use(authMiddleware)
+
+router.route('/callback').post(authController.callback)
 
 export const authRoute = router
