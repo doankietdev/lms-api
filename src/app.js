@@ -14,15 +14,17 @@ import { initCrons } from './crons'
 const app = express()
 
 app.use(hpp())
-app.use(helmet())
+app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }))
 app.use(compression())
 app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(cors({
-  origin: CLIENT_URL,
-  credentials:true
-}))
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    credentials: true
+  })
+)
 app.set('trust proxy', 1)
 app.use(hostMiddleware)
 
@@ -33,6 +35,4 @@ route(app)
 app.all('*', apiNotFoundMiddleware)
 app.use(errorMiddleware)
 
-export {
-  app
-}
+export { app }

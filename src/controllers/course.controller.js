@@ -9,7 +9,7 @@ const createCourse = asyncHandler(async (req, res) => {
     })
   }
 
-  const course = courseService.createCourse({
+  const course = await courseService.createCourse({
     courseTitle,
     category,
     creator: req.id
@@ -110,6 +110,9 @@ const getCourseLecture = asyncHandler(async (req, res) => {
   const { courseId } = req.params
   const course = await courseService.getCourseLecture(courseId)
   return res.status(200).json({
+    _id: course._id,
+    courseTitle: course.courseTitle,
+    courseThumbnail: course.courseThumbnail,
     lectures: course.lectures
   })
 })
