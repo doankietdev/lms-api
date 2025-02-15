@@ -17,7 +17,7 @@ const courseSchema = new mongoose.Schema(
     courseLevel: {
       type: String,
       enum: Object.values(COURSE_LEVELS),
-      default: null
+      default: COURSE_LEVELS.BEGINNER
     },
     coursePrice: {
       type: Number,
