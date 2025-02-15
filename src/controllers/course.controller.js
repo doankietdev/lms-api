@@ -32,6 +32,17 @@ const searchCourse = asyncHandler(async (req, res) => {
   })
 })
 
+const registerFree = asyncHandler(async (req, res) => {
+  const userId = req.id
+  const { courseId } = req.body
+
+  await courseService.registerFree({ courseId, userId })
+
+  return res.status(200).json({
+    success: true
+  })
+})
+
 const getPublishedCourse = asyncHandler(async (req, res) => {
   const courses = await courseService.getPublishedCourse()
   if (!courses) {
@@ -165,6 +176,7 @@ const togglePublishCourse = asyncHandler(async (req, res) => {
 export const courseController = {
   createCourse,
   searchCourse,
+  registerFree,
   getPublishedCourse,
   getCreatorCourses,
   editCourse,

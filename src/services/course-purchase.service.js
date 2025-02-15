@@ -2,13 +2,12 @@ import { StatusCodes } from 'http-status-codes'
 import Stripe from 'stripe'
 import { CLIENT_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '~/configs/env'
 import { AppError } from '~/errors/app.error'
+import { COURSE_FREE_ERROR, OWNER_CANNOT_PURCHASE_ERROR } from '~/errors/checkout.error'
 import { CreateStripeSessionError, PurchaseNotFoundError } from '~/errors/course-purchase.error'
 import { CourseNotFoundError } from '~/errors/course.error'
-import { Course } from '~/models/course.model'
 import { CoursePurchase } from '~/models/course-purchase.model'
-import { Lecture } from '~/models/lecture.model'
+import { Course } from '~/models/course.model'
 import { User } from '~/models/user.model'
-import { COURSE_FREE_ERROR, OWNER_CANNOT_PURCHASE_ERROR } from '~/errors/checkout.error'
 
 const stripe = new Stripe(STRIPE_SECRET_KEY)
 
@@ -97,17 +96,8 @@ const stripeWebhook = async (payload) => {
     }
     purchase.status = 'completed'
 
-    // Make all lectures visible by setting `isPreviewFree` to true
-    if (purchase.courseId && purchase.courseId.lectures.length > 0) {
-      await Lecture.updateMany(
-        { _id: { $in: purchase.courseId.lectures } },
-        { $set: { isPreviewFree: true } }
-      )
-    }
-
     await purchase.save()
 
-    // Update user's enrolledCourses
     await User.findByIdAndUpdate(
       purchase.userId,
       { $addToSet: { enrolledCourses: purchase.courseId._id } }, // Add course ID to enrolledCourses
@@ -131,18 +121,14 @@ const getCourseDetailWithPurchaseStatus = async ({ userId, courseId }) => {
     throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
   }
 
-  const isOwner = course.creator?._id.equals(userId)
-  if (!isOwner) {
-    const coursePurchase = await CoursePurchase.findOne({ userId, courseId, status: 'completed' })
-    return {
-      course,
-      purchased: !!coursePurchase
-    }
-  }
+  const coursePurchase = await CoursePurchase.findOne({ userId, courseId, status: 'completed' })
+
+  const registeredUserId = course.enrolledStudents.find(studentId => studentId.equals(userId))
 
   return {
     course,
-    isOwner: true
+    isOwner: course.creator?._id.equals(userId),
+    purchased: !!coursePurchase || !!registeredUserId
   }
 }
 

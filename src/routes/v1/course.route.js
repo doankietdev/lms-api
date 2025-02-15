@@ -13,6 +13,8 @@ router.route('/search').get(courseController.searchCourse)
 
 router.use(authMiddleware)
 
+router.route('/register-free').post(courseController.registerFree)
+
 router
   .route('/')
   .post(permissionMiddleware(ROLES.ADMIN, ROLES.INSTRUCTOR), courseController.createCourse)

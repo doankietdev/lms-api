@@ -6,15 +6,17 @@ import { Course } from '~/models/course.model'
 import { CourseProgress } from '~/models/course-progress.model'
 
 const getCourseProgress = async (courseId, userId) => {
-  const courseDetails = await Course.findById(courseId).populate('lectures')
+  const courseDetails = await Course.findOne({ _id: courseId, enrolledStudents: userId }).populate(
+    'lectures'
+  )
+  if (!courseDetails) {
+    throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
+  }
+
   let courseProgress = await CourseProgress.findOne({
     courseId,
     userId
   }).populate('courseId')
-
-  if (!courseDetails) {
-    throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
-  }
 
   if (!courseProgress) {
     return {

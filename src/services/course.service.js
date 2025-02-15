@@ -1,10 +1,15 @@
 import { StatusCodes } from 'http-status-codes'
 import path from 'path'
 import { AppError } from '~/errors/app.error'
-import { CourseNotFoundError } from '~/errors/course.error'
+import {
+  CannotRegisterNoFreeCourseError,
+  CourseNotFoundError,
+  CreatorCannotRegisterError
+} from '~/errors/course.error'
 import { LectureNotFoundError } from '~/errors/lecture.error'
 import { Course } from '~/models/course.model'
 import { Lecture } from '~/models/lecture.model'
+import { User } from '~/models/user.model'
 import { cloudinaryProvider } from '~/providers/cloudinary.provider'
 import { convertFileAppUrlToLocalPath } from '~/utils/formatter'
 import { logger } from '~/utils/logger'
@@ -43,6 +48,35 @@ const searchCourse = async ({ query = '', categories = '', sortByPrice = '' }) =
   return await Course.find(searchCriteria)
     .populate({ path: 'creator', select: 'name photoUrl' })
     .sort(sortOptions)
+}
+
+const registerFree = async ({ courseId, userId }) => {
+  const foundCourse = await Course.findOne({ _id: courseId })
+  if (!foundCourse) throw AppError.from(CourseNotFoundError, StatusCodes.NOT_FOUND)
+
+  if (foundCourse.creator.equals(userId))
+    throw AppError.from(CreatorCannotRegisterError, StatusCodes.BAD_REQUEST)
+
+  if (foundCourse.coursePrice > 0)
+    AppError.from(CannotRegisterNoFreeCourseError, StatusCodes.BAD_REQUEST)
+
+  const [updatedUser, updatedCourse] = await Promise.all([
+    User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { enrolledCourses: foundCourse._id } },
+      { new: true }
+    ),
+    Course.findByIdAndUpdate(
+      foundCourse._id,
+      { $addToSet: { enrolledStudents: userId } },
+      { new: true }
+    )
+  ])
+  if (!updatedUser || !updatedCourse)
+    throw AppError.from(
+      new Error('Failed to  register for study'),
+      StatusCodes.INTERNAL_SERVER_ERROR
+    ).withLog('User not found order Course not found')
 }
 
 const getPublishedCourse = async () => {
@@ -191,6 +225,7 @@ const togglePublishCourse = async (courseId, publish) => {
 export const courseService = {
   createCourse,
   searchCourse,
+  registerFree,
   getPublishedCourse,
   getCreatorCourses,
   editCourse,
